@@ -1,6 +1,7 @@
-from business_object.game import Game
-from business_object.player import Player
 from datetime import datetime
+
+from business_object.player import Player
+
 
 class Game:
     def __init__(
