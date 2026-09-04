@@ -1,0 +1,32 @@
+from business_object.game import Game
+from business_object.player import Player
+from datetime import datetime
+
+class Game:
+    def __init__(
+        self,
+        id_game: int,
+        player1: Player,
+        player2: Player,
+        game_mode: str,
+        winner: Player,
+        description: str,
+        timestamp: datetime,
+    ):
+
+        self.id_game = None
+        self.player1 = player1
+        self.player2 = player2
+        self.game_mode = game_mode
+        self.winner = winner
+        self.description = description
+        self.timestamp = timestamp
+
+    def __str__(self):
+
+        return (
+            f"{self.game_mode} between "
+            f"{self.player1.username} and {self.player2.username} | "
+            f"Winner : | "
+            f"Détails : {self.winner}"
+        )
