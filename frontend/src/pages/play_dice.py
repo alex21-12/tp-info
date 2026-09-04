@@ -1,0 +1,81 @@
+"""
+Streamlit page for playing a dice game.
+
+Allows a player to select an opponent and play a game of dice.
+
+Endpoints used:
+    GET /player
+    POST /game
+"""
+
+import time
+
+import streamlit as st
+
+from utils.api_client import api_client
+from utils.auth_guard import check_authentification
+from utils.log_init import get_page_logger
+
+st.title("Play a Dice Game")
+logger = get_page_logger("play_dice")
+
+check_authentification()
+
+player = st.session_state.get("player")
+
+# Fetch available players
+response = api_client.get("/player/")
+
+if response["status_code"] != 200:
+    st.error("Error loading players")
+    st.stop()
+
+players = response["data"]
+opponents = [
+    j for j in players if j["id_player"] != player["id_player"] and j["username"] != "admin"
+]
+
+if not opponents:
+    st.warning("No opponents available")
+    st.stop()
+
+# Opponent selection
+opponent = st.selectbox("Choose an opponent", opponents, format_func=lambda j: j["username"])
+
+
+if st.button("Roll the Dice"):
+    logger.info("Playing a dice game")
+    with st.spinner("Rolling the dice..."):
+        time.sleep(1)
+
+    # Call the game API
+    response = api_client.post(
+        "/game/",
+        json={
+            "id_opponent": opponent["id_player"],
+            "game_mode": "dice",
+        },
+    )
+
+    if response["status_code"] != 200:
+        st.error(response["data"])
+        st.stop()
+
+    data = response["data"]
+
+    # Display results
+    st.write(f"**{data['description']}**")
+
+    if data["winner"] == player["username"]:
+        st.success(f"""🎉 **You win!**\n\nYour new Elo rating is {data["new_elo1"]}""")
+        st.balloons()
+    elif data["winner"] == opponent["username"]:
+        st.warning(f"""😢 **You lose**\n\nYour new Elo rating is {data["new_elo1"]}""")
+    else:
+        st.info("Draw, no change in Elo rating")
+
+    logger.info("Dice game is over")
+
+# Back to menu button
+if st.button("Back to menu", type="primary"):
+    st.switch_page("pages/player_menu.py")
