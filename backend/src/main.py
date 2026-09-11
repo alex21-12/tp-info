@@ -23,7 +23,7 @@ load_environment_variables()
 display_values()
 
 
-app = FastAPI(title="My Webservice")
+app = FastAPI(title="My Webservice", root_path="/proxy/5000")
 
 app.add_middleware(LogMiddleware)
 
